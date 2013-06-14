@@ -1,4 +1,4 @@
-define(["../../common/events/postal","./filterView"], function (postal, filterView) {
+define(["../../common/events/postal","./filterView", "./selectView"], function (postal, filterView, selectView) {
 
   return Backbone.View.extend( { 
     tagName: "ul",
@@ -39,28 +39,17 @@ define(["../../common/events/postal","./filterView"], function (postal, filterVi
       }); 
 
       var combined = (grouped.wip || []).concat(grouped.backlog || []);
-      var milestoneViews = _.map(combined, function (milestone) {
-        return new filterView({color: "#0069D6", name: milestone.title, count: milestone.open_issues,
-                              condition: function (issue) { return issue.milestone && issue.milestone.title.toLocaleLowerCase() === milestone.title.toLocaleLowerCase();}}).render().el;
-      });
-      var noMilestone = new filterView({color: "#0069D6", name: "No milestone assigned", 
-                              condition: function (issue) { return !issue.milestone; }}).render().el;
+
+      var milestoneViews = new selectView({
+        options: combined,
+        option_value: 'title',
+        prompt: 'No milestone assigned',
+        condition: function(issue, selected) { return issue.milestone && issue.milestone.title.toLocaleLowerCase() === selected.toLocaleLowerCase(); },
+        promptCondition: function(issue) { return !issue.milestone; }
+      }).render().el;
 
       $this.append("<h5>Milestones</h5>");
-      $this.append(noMilestone);
       $this.append(milestoneViews);
-      $(milestoneViews.concat(noMilestone)).click(function(ev) {
-         ev.preventDefault();
-         var $this = $(this),
-             $clicked = $this.data("filter");
-         var othersActive = _(milestoneViews.concat(noMilestone)).filter(function(v) {
-           var data = $(v).data("filter");
-               return $clicked.cid !== data.cid && data.state !== 0;        
-         });
-         _(othersActive).each(function(v) {
-           $(v).trigger("clear");
-         });
-      });
 
       var labels = _.map(this.labels, function(label) {
           return new filterView({color: "#" + label.color, name: label.name, condition: function (issue) { return _.any(issue.labels, function(l){ return l.name.toLocaleLowerCase() === label.name.toLocaleLowerCase();})}}).render().el;
