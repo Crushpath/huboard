@@ -22,10 +22,10 @@ define(["../../common/events/postal"], function(postal) {
       var options = null;
 
       options = _.map(self.options, function(option) {
-        return self.optionTag(option[self.option_value]);
+        return self.optionTag(option[self.option_value], false);
       });
 
-      if (prompt) { options.push(self.optionTag(prompt)); }
+      if (prompt) { options.push(self.optionTag(prompt, true)); }
 
       $(this.el).html(options);
 
@@ -49,8 +49,8 @@ define(["../../common/events/postal"], function(postal) {
       });
     },
 
-    optionTag: function(value) {
-      return "<option>" + value + "</option>"
+    optionTag: function(value, selected) {
+      return (selected ? "<option selected>" : "<option>") + value + "</option>"
     }
   });
 });
