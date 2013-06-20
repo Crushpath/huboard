@@ -1,3 +1,4 @@
+require 'dalli'
 require_relative "github/repos"
 require_relative "github/assignees"
 require_relative "github/labels"
@@ -28,22 +29,6 @@ class Huboard
     [self.column_pattern, self.link_pattern, self.settings_pattern, self.priority_pattern]
   end
 
-  class SimpleCache < Hash
-    def read(key)
-      if cached = self[key]
-        cached
-      end
-    end
-
-    def write(key, data)
-      self[key] = data
-    end
-
-    def fetch(key)
-      read(key) || yield.tap { |data| write(key, data) }
-    end
-  end
-
   class Client
     class Mimetype < Faraday::Middleware
       begin
@@ -68,10 +53,9 @@ class Huboard
 
 
     def initialize(access_token)
-      @cache = SimpleCache.new
       @connection_factory = ->(token = nil) {
           Ghee.new(:access_token => token || access_token) do |conn|
-            conn.use FaradayMiddleware::Caching, @cache 
+            conn.use FaradayMiddleware::Caching, Dalli::Client.new
             conn.use Mimetype
           end
       }
