@@ -8,6 +8,8 @@ gem 'sinatra-content-for', "~> 0.1.0"
 gem 'ghee'
 gem 'rack-cache'
 gem 'activesupport'
+gem 'dalli'
+gem 'newrelic_rpm'
 
 group :development do
   gem 'watchr'
@@ -19,6 +21,5 @@ group :development do
 end
 
 group :production do
-  gem 'newrelic_rpm'
   gem 'unicorn'
 end

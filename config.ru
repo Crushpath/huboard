@@ -9,18 +9,22 @@ require './lib/app.rb'
 require './lib/api.rb'
 require './lib/github.rb'
 require './lib/pebble.rb'
+require 'newrelic_rpm'
 
-configure :production do 
-  require "newrelic_rpm"
+configure :development do
+  require 'new_relic/rack/developer_mode'
+
+  use NewRelic::Rack::DeveloperMode
 end
 
 use Rack::NoWWW
-use Rack::Static, :urls => [ "/font","/img", "/scripts","/css"], :root => "public"
+use Rack::Static, urls: ['/font', '/img', '/scripts', '/css'], root: 'public'
 
 map "/api" do
   run Huboard::API
 
 end
-map "/" do 
-    run Huboard::App
+
+map "/" do
+  run Huboard::App
 end
